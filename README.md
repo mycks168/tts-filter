@@ -5,7 +5,7 @@ VOICEVOX などの TTS に渡す前に、技術文書・LLM応答・Markdown を
 ## できること
 
 - `README.md` のようなファイル名を読みやすく正規化
-- `LLM`, `API`, `URL`, `VOICEVOX`, `OpenClaw`, `Gitea`, `uv`, `pytest`, `OFF` などの技術単語や状態表記を辞書で管理
+- `LLM`, `API`, `URL`, `VOICEVOX`, `OpenClaw`, `Gitea`, `gitignore`, `uv`, `pytest`, `OFF` などの技術単語や状態表記を辞書で管理
 - path, version, date, time, URL, email を読み上げ向けに整形
 - YAML 辞書を API 経由で登録・変更・削除
 - Bearer 認証つき HTTP API を提供

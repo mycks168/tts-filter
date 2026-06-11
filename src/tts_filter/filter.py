@@ -17,6 +17,7 @@ DEFAULT_CONFIG = {
         "CSS": "シーエスエス",
         "GPU": "ジーピーユー",
         "GITEA": "ギテア",
+        "GITIGNORE": "ギットイグノア",
         "HTML": "エイチティーエムエル",
         "HTTP": "エイチティーティーピー",
         "HTTPS": "エイチティーティーピーエス",
@@ -59,6 +60,7 @@ URL_RE = re.compile(r"https?://[^\s)]+")
 EMAIL_RE = re.compile(r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b")
 PATHISH_RE = re.compile(r"\b(?:[A-Za-z0-9_.-]+[\\/])+[A-Za-z0-9_.-]+\b|(?:(?:[A-Za-z]:)?[~/\\/]|\./|\.\./)[^\s、。,.!?()\[\]{}<>]+", re.ASCII)
 FILENAME_RE = re.compile(r"\b(?=[A-Za-z0-9_-]*[A-Za-z_][A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\b)[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+\b", re.ASCII)
+DOTFILE_RE = re.compile(r"(?<![\w/])\.([A-Za-z][A-Za-z0-9_-]+)(?![A-Za-z0-9_-])", re.ASCII)
 VERSION_RE = re.compile(r"\bv(\d+(?:\.\d+)+)\b", re.IGNORECASE)
 DATE_RE = re.compile(r"\b(20\d{2})-(\d{1,2})-(\d{1,2})\b")
 TIME_RE = re.compile(r"\b(\d{1,2}):(\d{2})\b")
@@ -169,6 +171,7 @@ class TTSFilter:
         text = VERSION_RE.sub(lambda m: f"バージョン {m.group(1)}", text)
         text = PATHISH_RE.sub(self._replace_pathish, text)
         text = FILENAME_RE.sub(self._replace_filename, text)
+        text = DOTFILE_RE.sub(self._replace_dotfile, text)
         text = SNAKE_KEBAB_RE.sub(self._replace_identifier, text)
         text = CAMEL_RE.sub(self._replace_identifier, text)
         text = UPPER_ACRONYM_RE.sub(self._replace_acronym, text)
@@ -328,6 +331,13 @@ class TTSFilter:
 
     def _replace_filename(self, match: re.Match[str]) -> str:
         return self._speak_filename(match.group(0))
+
+    def _replace_dotfile(self, match: re.Match[str]) -> str:
+        """単体のドットファイル名を読み上げ向けに変換する"""
+        name = match.group(1)
+        if name.upper() in self.acronyms:
+            return self.acronyms[name.upper()]
+        return f"ドット {self._split_identifier(name)}"
 
     def _speak_filename(self, token: str) -> str:
         name = PurePosixPath(token).name

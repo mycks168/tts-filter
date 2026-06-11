@@ -25,6 +25,11 @@ def test_off_is_read_as_japanese():
     assert "ミュートをオフにして" in got
 
 
+def test_gitignore_is_read_as_japanese():
+    got = normalize_for_tts("gitignore と .gitignore を確認して")
+    assert "ギットイグノア と ギットイグノア を確認して" in got
+
+
 def test_path():
     got = normalize_for_tts("src/utils/readme.md を開く")
     assert "スラッシュ" in got
