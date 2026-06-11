@@ -14,9 +14,10 @@ def test_md_inside_word_is_not_replaced():
 
 
 def test_acronyms():
-    got = normalize_for_tts("LLM と API と OpenClaw と Gitea と uv と pytest")
+    got = normalize_for_tts("LLM と API と OpenClaw と Gitea と uv と pytest と POST")
     assert "エルエルエム" in got
     assert "エーピーアイ" in got
+    assert "ポスト" in got
 
 
 def test_path():
