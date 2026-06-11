@@ -30,6 +30,11 @@ def test_gitignore_is_read_as_japanese():
     assert "ギットイグノア と ギットイグノア を確認して" in got
 
 
+def test_image_is_read_as_japanese():
+    got = normalize_for_tts("image を表示して IMAGE を作って")
+    assert "イメージ を表示して イメージ を作って" in got
+
+
 def test_path():
     got = normalize_for_tts("src/utils/readme.md を開く")
     assert "スラッシュ" in got
