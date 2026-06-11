@@ -23,6 +23,7 @@ DEFAULT_CONFIG = {
         "JSON": "ジェイソン",
         "LLM": "エルエルエム",
         "MARKDOWN": "マークダウン",
+        "OFF": "オフ",
         "OPENCLAW": "オープンクロー",
         "PR": "ピーアール",
         "PYTEST": "パイテスト",
@@ -83,9 +84,25 @@ def load_config(path: str | Path | None = None) -> dict[str, dict[str, str]]:
     with config_path.open("r", encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
     return {
-        "acronyms": dict(data.get("acronyms", {})),
-        "extensions": dict(data.get("extensions", {})),
+        "acronyms": _normalize_config_bucket(data.get("acronyms", {})),
+        "extensions": _normalize_config_bucket(data.get("extensions", {})),
     }
+
+
+def _normalize_config_bucket(raw: object) -> dict[str, str]:
+    """YAMLでON/OFFなどが真偽値キーとして読まれても辞書キーへ戻す"""
+    if not isinstance(raw, dict):
+        return {}
+    normalized: dict[str, str] = {}
+    for key, value in raw.items():
+        if key is True:
+            normalized_key = "ON"
+        elif key is False:
+            normalized_key = "OFF"
+        else:
+            normalized_key = str(key)
+        normalized[normalized_key] = str(value)
+    return normalized
 
 
 def save_config(config: dict[str, dict[str, str]], path: str | Path | None = None) -> Path:

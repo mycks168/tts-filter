@@ -20,6 +20,11 @@ def test_acronyms():
     assert "ポスト" in got
 
 
+def test_off_is_read_as_japanese():
+    got = normalize_for_tts("ミュートをOFFにして")
+    assert "ミュートをオフにして" in got
+
+
 def test_path():
     got = normalize_for_tts("src/utils/readme.md を開く")
     assert "スラッシュ" in got
@@ -47,7 +52,15 @@ def test_inline_code_is_normalized_by_default():
 def test_load_config_from_yaml():
     config = load_config(Path("src/tts_filter/dictionary.yml"))
     assert config["acronyms"]["LLM"] == "エルエルエム"
+    assert config["acronyms"]["OFF"] == "オフ"
     assert config["extensions"]["md"] == "エムディー"
+
+
+def test_load_config_recovers_yaml_boolean_keys(tmp_path: Path):
+    path = tmp_path / "dictionary.yml"
+    path.write_text("acronyms:\n  OFF: オフ\nextensions: {}\n", encoding="utf-8")
+    config = load_config(path)
+    assert config["acronyms"]["OFF"] == "オフ"
 
 
 def test_upsert_and_delete_entry(tmp_path: Path):
