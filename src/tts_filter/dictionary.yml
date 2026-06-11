@@ -1,6 +1,7 @@
 acronyms:
   AI: エーアイ
   API: エーピーアイ
+  AUTOSSH: オートエスエスエイチ
   CLI: シーエルアイ
   CPU: シーピーユー
   CSS: シーエスエス
@@ -24,6 +25,7 @@ acronyms:
   README: リードミー
   REDMINE: レッドマイン
   SAFENET: セーフネット
+  SERVICE: サービス
   SKILL: スキル
   SRC: ソース
   SSH: エスエスエイチ
@@ -45,6 +47,7 @@ extensions:
   md: エムディー
   py: パイ
   sh: シェル
+  service: サービス
   toml: トムル
   ts: ティーエス
   txt: テキスト

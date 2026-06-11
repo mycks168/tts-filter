@@ -35,6 +35,11 @@ def test_image_is_read_as_japanese():
     assert "イメージ を表示して イメージ を作って" in got
 
 
+def test_autossh_service_is_read_as_japanese():
+    got = normalize_for_tts("SSH と autossh-clove.service と service を確認して")
+    assert "エスエスエイチ と オートエスエスエイチ clove サービス と サービス を確認して" in got
+
+
 def test_path():
     got = normalize_for_tts("src/utils/readme.md を開く")
     assert "スラッシュ" in got

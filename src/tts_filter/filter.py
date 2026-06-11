@@ -12,6 +12,7 @@ DEFAULT_CONFIG = {
     "acronyms": {
         "AI": "エーアイ",
         "API": "エーピーアイ",
+        "AUTOSSH": "オートエスエスエイチ",
         "CLI": "シーエルアイ",
         "CPU": "シーピーユー",
         "CSS": "シーエスエス",
@@ -31,6 +32,7 @@ DEFAULT_CONFIG = {
         "PYTEST": "パイテスト",
         "PYTHON": "パイソン",
         "README": "リードミー",
+        "SERVICE": "サービス",
         "SSH": "エスエスエイチ",
         "TTS": "ティーティーエス",
         "URL": "ユーアールエル",
@@ -47,6 +49,7 @@ DEFAULT_CONFIG = {
         "md": "エムディー",
         "py": "パイ",
         "sh": "シェル",
+        "service": "サービス",
         "toml": "トムル",
         "ts": "ティーエス",
         "txt": "テキスト",
