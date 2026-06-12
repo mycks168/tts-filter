@@ -6,17 +6,20 @@ acronyms:
   CPU: シーピーユー
   CSS: シーエスエス
   GPU: ジーピーユー
+  GPSD: ジーピーエスディー
   GITEA: ギテア
   GITIGNORE: ギットイグノア
   HTML: エイチティーエムエル
   HTTP: エイチティーティーピー
   HTTPS: エイチティーティーピーエス
   IMAGE: イメージ
+  JPEG: ジェイペグ
   JSON: ジェイソン
   LLM: エルエルエム
   MARKDOWN: マークダウン
   "OFF": オフ
   OPENCLAW: オープンクロー
+  PNG: ピング
   PR: ピーアール
   POST: ポスト
   PYTEST: パイテスト
@@ -39,12 +42,17 @@ acronyms:
   STATUS: ステータス
   ARGOS: アルゴス
   OPENAI: オープンエーアイ
+terms:
+  誤変換: ごへんかん
 extensions:
   conf: コンフ
   ini: イニ
   js: ジェイエス
+  jpeg: ジェイペグ
+  jpg: ジェイペグ
   json: ジェイソン
   md: エムディー
+  png: ピング
   py: パイ
   sh: シェル
   service: サービス
@@ -53,3 +61,6 @@ extensions:
   txt: テキスト
   yaml: ヤムル
   yml: ヤムル
+phrase_rules:
+  - pattern: "((?:テスト|pytest|パイテスト)[^。、\\n]{0,12}?)通(っている|ってる|った|る|ります|りました)"
+    replacement: "\\1とお\\2"

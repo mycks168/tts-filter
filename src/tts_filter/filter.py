@@ -17,17 +17,20 @@ DEFAULT_CONFIG = {
         "CPU": "シーピーユー",
         "CSS": "シーエスエス",
         "GPU": "ジーピーユー",
+        "GPSD": "ジーピーエスディー",
         "GITEA": "ギテア",
         "GITIGNORE": "ギットイグノア",
         "HTML": "エイチティーエムエル",
         "HTTP": "エイチティーティーピー",
         "HTTPS": "エイチティーティーピーエス",
         "IMAGE": "イメージ",
+        "JPEG": "ジェイペグ",
         "JSON": "ジェイソン",
         "LLM": "エルエルエム",
         "MARKDOWN": "マークダウン",
         "OFF": "オフ",
         "OPENCLAW": "オープンクロー",
+        "PNG": "ピング",
         "PR": "ピーアール",
         "PYTEST": "パイテスト",
         "PYTHON": "パイソン",
@@ -41,12 +44,18 @@ DEFAULT_CONFIG = {
         "VOICEVOX": "ボイスボックス",
         "YAML": "ヤムル",
     },
+    "terms": {
+        "誤変換": "ごへんかん",
+    },
     "extensions": {
         "conf": "コンフ",
         "ini": "イニ",
         "js": "ジェイエス",
+        "jpeg": "ジェイペグ",
+        "jpg": "ジェイペグ",
         "json": "ジェイソン",
         "md": "エムディー",
+        "png": "ピング",
         "py": "パイ",
         "sh": "シェル",
         "service": "サービス",
@@ -56,6 +65,12 @@ DEFAULT_CONFIG = {
         "yaml": "ヤムル",
         "yml": "ヤムル",
     },
+    "phrase_rules": [
+        {
+            "pattern": r"((?:テスト|pytest|パイテスト)[^。、\n]{0,12}?)通(っている|ってる|った|る|ります|りました)",
+            "replacement": r"\1とお\2",
+        },
+    ],
 }
 
 CODE_BLOCK_RE = re.compile(r"```(?P<lang>[^\n`]*)\n(?P<body>.*?)```", re.DOTALL)
@@ -83,7 +98,7 @@ def _default_config_path() -> Path:
     return Path(__file__).with_name("dictionary.yml")
 
 
-def load_config(path: str | Path | None = None) -> dict[str, dict[str, str]]:
+def load_config(path: str | Path | None = None) -> dict[str, object]:
     config_path = Path(path) if path else _default_config_path()
     if not config_path.exists():
         save_config(DEFAULT_CONFIG, config_path)
@@ -91,7 +106,9 @@ def load_config(path: str | Path | None = None) -> dict[str, dict[str, str]]:
         data = yaml.safe_load(fh) or {}
     return {
         "acronyms": _normalize_config_bucket(data.get("acronyms", {})),
+        "terms": _normalize_config_bucket(data.get("terms", {})),
         "extensions": _normalize_config_bucket(data.get("extensions", {})),
+        "phrase_rules": _normalize_phrase_rules(data.get("phrase_rules", [])),
     }
 
 
@@ -111,7 +128,22 @@ def _normalize_config_bucket(raw: object) -> dict[str, str]:
     return normalized
 
 
-def save_config(config: dict[str, dict[str, str]], path: str | Path | None = None) -> Path:
+def _normalize_phrase_rules(raw: object) -> list[dict[str, str]]:
+    """YAMLから読み込んだ正規表現ルールを安全な形にそろえる"""
+    if not isinstance(raw, list):
+        return []
+    rules: list[dict[str, str]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        pattern = item.get("pattern")
+        replacement = item.get("replacement")
+        if isinstance(pattern, str) and isinstance(replacement, str):
+            rules.append({"pattern": pattern, "replacement": replacement})
+    return rules
+
+
+def save_config(config: dict[str, object], path: str | Path | None = None) -> Path:
     config_path = Path(path) if path else _default_config_path()
     config_path.parent.mkdir(parents=True, exist_ok=True)
     with config_path.open("w", encoding="utf-8") as fh:
@@ -119,18 +151,22 @@ def save_config(config: dict[str, dict[str, str]], path: str | Path | None = Non
     return config_path
 
 
-def upsert_entry(category: str, key: str, value: str, path: str | Path | None = None) -> dict[str, dict[str, str]]:
+def upsert_entry(category: str, key: str, value: str, path: str | Path | None = None) -> dict[str, object]:
     config = load_config(path)
     bucket = config.setdefault(category, {})
+    if not isinstance(bucket, dict):
+        bucket = {}
+        config[category] = bucket
     bucket[key] = value
     save_config(config, path)
     return config
 
 
-def delete_entry(category: str, key: str, path: str | Path | None = None) -> dict[str, dict[str, str]]:
+def delete_entry(category: str, key: str, path: str | Path | None = None) -> dict[str, object]:
     config = load_config(path)
     bucket = config.setdefault(category, {})
-    bucket.pop(key, None)
+    if isinstance(bucket, dict):
+        bucket.pop(key, None)
     save_config(config, path)
     return config
 
@@ -138,7 +174,9 @@ def delete_entry(category: str, key: str, path: str | Path | None = None) -> dic
 @dataclass
 class TTSFilter:
     acronyms: dict[str, str] = field(default_factory=dict)
+    terms: dict[str, str] = field(default_factory=dict)
     extensions: dict[str, str] = field(default_factory=dict)
+    phrase_rules: list[dict[str, str]] = field(default_factory=list)
     code_block_mode: str = "ollama-summary"
     ollama_model: str = "qwen2.5:0.5b"
     ollama_timeout_seconds: int = 20
@@ -154,11 +192,22 @@ class TTSFilter:
             )
         else:
             self._dict_re = None
+        self._phrase_res: list[tuple[re.Pattern[str], str]] = []
+        for rule in self.phrase_rules:
+            try:
+                self._phrase_res.append((re.compile(rule["pattern"]), rule["replacement"]))
+            except re.error:
+                continue
 
     @classmethod
     def from_yaml(cls, path: str | Path | None = None) -> "TTSFilter":
         config = load_config(path)
-        return cls(acronyms=config["acronyms"], extensions=config["extensions"])
+        return cls(
+            acronyms=config["acronyms"],  # type: ignore[arg-type]
+            terms=config["terms"],  # type: ignore[arg-type]
+            extensions=config["extensions"],  # type: ignore[arg-type]
+            phrase_rules=config["phrase_rules"],  # type: ignore[arg-type]
+        )
 
     def normalize(self, text: str) -> str:
         text = CODE_BLOCK_RE.sub(self._replace_code_block, text)
@@ -170,6 +219,8 @@ class TTSFilter:
         protected: list[str] = []
         text = self._protect_pattern(text, protected, URL_RE)
         text = self._protect_pattern(text, protected, EMAIL_RE)
+        text = self._apply_phrase_rules(text)
+        text = self._apply_terms(text)
         text = DATE_RE.sub(lambda m: f"{int(m.group(1))}年{int(m.group(2))}月{int(m.group(3))}日", text)
         text = TIME_RE.sub(lambda m: f"{int(m.group(1))}時{int(m.group(2))}分", text)
         text = VERSION_RE.sub(lambda m: f"バージョン {m.group(1)}", text)
@@ -213,6 +264,18 @@ class TTSFilter:
             return self._summarize_rule(lang, body)
         # ollama-summary
         return self._summarize_ollama(lang, body)
+
+    def _apply_phrase_rules(self, text: str) -> str:
+        """外部定義した正規表現ルールを順番に適用する"""
+        for pattern, replacement in self._phrase_res:
+            text = pattern.sub(replacement, text)
+        return text
+
+    def _apply_terms(self, text: str) -> str:
+        """日本語など単語境界を使いにくい語を辞書で置換する"""
+        for key, value in sorted(self.terms.items(), key=lambda item: len(item[0]), reverse=True):
+            text = text.replace(key, value)
+        return text
 
     def _summarize_meta(self, lang: str, body: str) -> str:
         """言語名と行数だけ読む（B案）"""

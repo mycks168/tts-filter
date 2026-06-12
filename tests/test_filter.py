@@ -35,9 +35,44 @@ def test_image_is_read_as_japanese():
     assert "イメージ を表示して イメージ を作って" in got
 
 
+def test_image_formats_are_read_as_japanese():
+    got = normalize_for_tts("JPEG と PNG と sample.jpg と icon.png を確認して")
+    assert "ジェイペグ と ピング と sample ジェイペグ と icon ピング を確認して" in got
+
+
 def test_autossh_service_is_read_as_japanese():
     got = normalize_for_tts("SSH と autossh-clove.service と service を確認して")
     assert "エスエスエイチ と オートエスエスエイチ clove サービス と サービス を確認して" in got
+
+
+def test_gpsd_is_read_as_japanese():
+    got = normalize_for_tts("GPSD と gpsd を確認して")
+    assert "ジーピーエスディー と ジーピーエスディー を確認して" in got
+
+
+def test_test_pass_reading_uses_tooru():
+    got = normalize_for_tts("テストも通ってる。テストを通る。")
+    assert "テストもとおってる。テストをとおる。" in got
+
+
+def test_japanese_term_is_read_from_dictionary():
+    got = normalize_for_tts("誤変換を直す")
+    assert "ごへんかんを直す" in got
+
+
+def test_phrase_rules_are_loaded_from_yaml(tmp_path: Path):
+    path = tmp_path / "dictionary.yml"
+    save_config(
+        {
+            "acronyms": {},
+            "terms": {},
+            "extensions": {},
+            "phrase_rules": [{"pattern": "確認した", "replacement": "確認済み"}],
+        },
+        path,
+    )
+    tts_filter = TTSFilter.from_yaml(path)
+    assert tts_filter.normalize("確認した") == "確認済み"
 
 
 def test_path():
@@ -68,7 +103,9 @@ def test_load_config_from_yaml():
     config = load_config(Path("src/tts_filter/dictionary.yml"))
     assert config["acronyms"]["LLM"] == "エルエルエム"
     assert config["acronyms"]["OFF"] == "オフ"
+    assert config["terms"]["誤変換"] == "ごへんかん"
     assert config["extensions"]["md"] == "エムディー"
+    assert config["phrase_rules"]
 
 
 def test_load_config_recovers_yaml_boolean_keys(tmp_path: Path):
@@ -80,13 +117,17 @@ def test_load_config_recovers_yaml_boolean_keys(tmp_path: Path):
 
 def test_upsert_and_delete_entry(tmp_path: Path):
     path = tmp_path / "dictionary.yml"
-    save_config({"acronyms": {"LLM": "エルエルエム"}, "extensions": {}}, path)
+    save_config({"acronyms": {"LLM": "エルエルエム"}, "terms": {}, "extensions": {}, "phrase_rules": []}, path)
     upsert_entry("acronyms", "GITEA", "ギテア", path)
+    upsert_entry("terms", "誤変換", "ごへんかん", path)
     updated = load_config(path)
     assert updated["acronyms"]["GITEA"] == "ギテア"
+    assert updated["terms"]["誤変換"] == "ごへんかん"
     delete_entry("acronyms", "GITEA", path)
+    delete_entry("terms", "誤変換", path)
     updated = load_config(path)
     assert "GITEA" not in updated["acronyms"]
+    assert "誤変換" not in updated["terms"]
 
 
 def test_inline_code_is_normalized():

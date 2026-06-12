@@ -5,8 +5,10 @@ VOICEVOX などの TTS に渡す前に、技術文書・LLM応答・Markdown を
 ## できること
 
 - `README.md` のようなファイル名を読みやすく正規化
-- `LLM`, `API`, `URL`, `VOICEVOX`, `OpenClaw`, `Gitea`, `gitignore`, `image`, `autossh`, `service`, `uv`, `pytest`, `OFF` などの技術単語や状態表記を辞書で管理
+- `LLM`, `API`, `URL`, `VOICEVOX`, `OpenClaw`, `Gitea`, `gitignore`, `image`, `JPEG`, `PNG`, `autossh`, `GPSD`, `service`, `uv`, `pytest`, `OFF` などの技術単語や状態表記を辞書で管理
+- `誤変換` などの日本語単語も辞書で管理
 - path, version, date, time, URL, email を読み上げ向けに整形
+- テスト文脈の `通ってる` や `通る` など、文脈依存の読みは正規表現ルールで管理
 - YAML 辞書を API 経由で登録・変更・削除
 - Bearer 認証つき HTTP API を提供
 
@@ -15,7 +17,9 @@ VOICEVOX などの TTS に渡す前に、技術文書・LLM応答・Markdown を
 辞書は `src/tts_filter/dictionary.yml` にあります。
 
 - `acronyms`: 略語や技術単語の読み
+- `terms`: 日本語など、単語境界を使いにくい語の読み
 - `extensions`: 拡張子の読み
+- `phrase_rules`: 文脈依存の読みを補正する正規表現ルール
 
 ## セットアップ
 
@@ -115,6 +119,7 @@ uv run tts-filter --code-block-mode ollama-summary --ollama-model qwen2.5:0.5b <
 ## systemd デーモン化
 
 `tts-filter.service` をユーザー systemd に登録して常駐させます。サービスは `/opt/tts-filter` にインストールされ、ポート `9191` で起動します。
+辞書YAMLはリクエストごとに読み直すため、単語や正規表現ルールの追加はサービス再起動なしで反映されます。
 
 ```bash
 # /opt/tts-filter にファイルをインストール

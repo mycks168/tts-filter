@@ -28,18 +28,18 @@ class NormalizeResponse(BaseModel):
 
 
 class DictionaryEntryRequest(BaseModel):
-    category: Literal["acronyms", "extensions"]
+    category: Literal["acronyms", "terms", "extensions"]
     key: str = Field(..., min_length=1)
     value: str = Field(..., min_length=1)
 
 
 class DictionaryDeleteRequest(BaseModel):
-    category: Literal["acronyms", "extensions"]
+    category: Literal["acronyms", "terms", "extensions"]
     key: str = Field(..., min_length=1)
 
 
 class DictionaryResponse(BaseModel):
-    config: dict[str, dict[str, str]]
+    config: dict[str, object]
 
 
 class MessageResponse(BaseModel):
