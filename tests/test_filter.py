@@ -50,9 +50,19 @@ def test_gpsd_is_read_as_japanese():
     assert "ジーピーエスディー と ジーピーエスディー を確認して" in got
 
 
+def test_reminder_is_read_as_japanese():
+    got = normalize_for_tts("Reminder と REMINDER と argos-reminder を確認して")
+    assert "リマインダー と リマインダー と アルゴス リマインダー を確認して" in got
+
+
+def test_tmp_is_read_as_temp():
+    got = normalize_for_tts("/tmp/argos と TMP と temp と tmpfs を確認して")
+    assert "ルート スラッシュ テンプ スラッシュ アルゴス と テンプ と テンプ と テンプエフエス を確認して" in got
+
+
 def test_test_pass_reading_uses_tooru():
-    got = normalize_for_tts("テストも通ってる。テストを通る。")
-    assert "テストもとおってる。テストをとおる。" in got
+    got = normalize_for_tts("テストも通ってる。テストを通る。検証も通ってる。")
+    assert "テストもとおってる。テストをとおる。検証もとおってる。" in got
 
 
 def test_japanese_term_is_read_from_dictionary():

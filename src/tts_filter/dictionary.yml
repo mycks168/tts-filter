@@ -17,6 +17,7 @@ acronyms:
   JSON: ジェイソン
   LLM: エルエルエム
   MARKDOWN: マークダウン
+  MCP: エムシーピー
   "OFF": オフ
   OPENCLAW: オープンクロー
   PNG: ピング
@@ -27,11 +28,15 @@ acronyms:
   PYTHONPATH: パイソンパス
   README: リードミー
   REDMINE: レッドマイン
+  REMINDER: リマインダー
   SAFENET: セーフネット
   SERVICE: サービス
   SKILL: スキル
   SRC: ソース
   SSH: エスエスエイチ
+  TEMP: テンプ
+  TMP: テンプ
+  TMPFS: テンプエフエス
   TTS: ティーティーエス
   URL: ユーアールエル
   UV: ユーブイ
@@ -62,5 +67,5 @@ extensions:
   yaml: ヤムル
   yml: ヤムル
 phrase_rules:
-  - pattern: "((?:テスト|pytest|パイテスト)[^。、\\n]{0,12}?)通(っている|ってる|った|る|ります|りました)"
+  - pattern: "((?:テスト|検証|pytest|パイテスト)[^。、\\n]{0,12}?)通(っている|ってる|った|る|ります|りました)"
     replacement: "\\1とお\\2"
